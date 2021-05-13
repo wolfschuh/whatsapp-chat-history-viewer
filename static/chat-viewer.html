@@ -74,9 +74,17 @@
                                 '            </div>' +
                                 '    </div>');
 
-                                // TODO: We need to show all media
-                                let mineMedia = getMediaForDate(data.images.mine, data.video.mine, date);
-                                let otherMedia = getMediaForDate(data.images.other, data.video.other, date);
+                                let currentMessages = data.messages[date];
+                                let mineMedia = {
+                                    'mediaList': getMediaForDate(data.images.mine, data.video.mine, date),
+                                    'mediaReferences': currentMessages.filter(message => (message.myself == true && message.text.includes('<Media omitted>'))).length,
+                                    'curIndex': 0
+                                };
+                                let otherMedia = {
+                                    'mediaList': getMediaForDate(data.images.other, data.video.other, date),
+                                    'mediaReferences': currentMessages.filter(message => (message.myself == false && message.text.includes('<Media omitted>'))).length,
+                                    'curIndex': 0
+                                };
 
                                 data.messages[date].forEach(message => {
                                     if (!!message.person) {
@@ -84,16 +92,19 @@
                                         let text = '';
                                         if (message.text.includes('<Media omitted>')) {
                                             let media = (message.myself) ? mineMedia : otherMedia;
-                                            if (media.length > 0) {
-                                                if (media[0].type == 'image') {
-                                                    text = 'Image: <img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + media[0].file + '" width="80%" height="80%" />';
+                                            // TODO: handle situation with remaining media
+                                            if (media.mediaList.length > media.curIndex) {
+                                                if (media.mediaList[media.curIndex].type == 'image') {
+                                                    text = 'Image: <img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + media.mediaList[media.curIndex].file + '" width="80%" height="80%" />';
                                                 } else {
-                                                    text = '((Video)) ' + media[0].file;
+                                                    // TODO: Show video
+                                                    text = '((Video)) ' + media.mediaList[media.curIndex].file;
                                                 }
                                             }
                                             else {
-                                                text = 'Image not available';
+                                                text = 'Media not available';
                                             }
+                                            media.curIndex ++;
                                         } else {
                                             message.text.forEach(line => {
                                                 text += escapeHtml(line) + '<br />';
