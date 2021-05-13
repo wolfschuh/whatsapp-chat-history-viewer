@@ -66,7 +66,7 @@
                                     // TODO: We need to show all media
                                     let images = (message.myself) ? data.images.mine[message.date.date] : data.images.other[message.date.date];
                                     if (!!images) {
-                                        text = '<img src="/images/' + ((message.myself) ? 'Sent/' : '') + images.files[0] + '" width="80%" height="80%" />';
+                                        text = '<img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + images.files[0] + '" width="80%" height="80%" />';
                                     }
                                     else {
                                         text = 'Image not available';

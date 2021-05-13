@@ -6,10 +6,6 @@ const app = express();
 
 const PORT = 9080;
 
-/* TODO:
-   - Bilder anzeigen
-*/
-
 app.get('/', function (request, response) {
 	response.send('Hello, World!');
 });
@@ -66,10 +62,7 @@ let img_other = getMediaFiles(IMG_OTHER_ROOT, 'IMG');
 let vid_mine = getMediaFiles(VID_MINE_ROOT, 'VID');
 let vid_other = getMediaFiles(VID_OTHER_ROOT, 'VID');
 
-
-app.get('/api/chats', function (request, response) {
-	response.setHeader('Content-Type', 'application/json');
-	
+function getChatList() {
 	let files = [];
 	let i = 0;
 
@@ -79,15 +72,15 @@ app.get('/api/chats', function (request, response) {
 			files.push({ 'id' : (i ++), 'name': file.replace(/^WhatsApp Chat with /, '').replace(/.txt$/, '') });
 		});
 
-	response.send(JSON.stringify({ 'chats': files }));
+	return files;
+}
+
+app.get('/api/chats', function (request, response) {
+	response.setHeader('Content-Type', 'application/json');
+	response.send(JSON.stringify({ 'chats': getChatList() }));
 });
 
-app.get('/api/chat', function (request, response) {
-	let chatName = request.query.name;
-	console.log('Request for chat ' + chatName);
-
-	response.setHeader('Content-Type', 'application/json');
-
+function getChatContents(chatName) {
 	let lines = fs.readFileSync(path.join(DATA_ROOT, '/WhatsApp Chat with ' + chatName + '.txt')).toString().split(/(?:\r\n|\r|\n)/g);
 	let messages = [];
 	let lastDate = "";
@@ -119,11 +112,30 @@ app.get('/api/chat', function (request, response) {
 		messages.push(message);
 		i = j;
 	}
+	return messages;
+}	
 
-	response.send(JSON.stringify({ 'images': { 'mine': img_mine, 'other': img_other }, 'video': { 'mine': vid_mine, 'other': vid_other }, 'messages': messages }));
+app.get('/api/chat', function (request, response) {
+	let chatName = request.query.name;
+	console.log('Request for chat ' + chatName);
+
+	let responseObject = {
+		'images': {
+			'mine': img_mine,
+			'other': img_other
+		},
+		'video': {
+			'mine': vid_mine,
+			'other': vid_other
+		},
+		'messages': getChatContents(chatName)
+	};
+
+	response.setHeader('Content-Type', 'application/json');
+	response.send(JSON.stringify(responseObject));
 });
 
 console.log('Static content at ' + HTML_ROOT);
-app.use(express.static(HTML_ROOT));
+app.use('/static', express.static(HTML_ROOT));
 
 app.listen(PORT, console.log('Chat viewer listening on port ' + PORT));
