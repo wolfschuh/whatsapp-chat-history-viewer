@@ -1,0 +1,129 @@
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+
+const app = express();
+
+const PORT = 9080;
+
+/* TODO:
+   - Bilder anzeigen
+*/
+
+app.get('/', function (request, response) {
+	response.send('Hello, World!');
+});
+
+function parseDate(dateString) {
+	let date = {};
+	date.date = dateString.substring(0, 10);
+	let hour = dateString.replace(/.*, /, '').replace(/:.*/, '');
+	let minute = dateString.replace(/.*:/, '').replace(/ .*/, '');
+	date.time = hour + ':' + minute + ' ';
+	if (dateString.includes('in the afternoon') || dateString.includes('in the evening') || (dateString.includes('in the night') && hour > 8)) {
+		date.time += 'PM';
+	} else {
+		date.time += 'AM';
+	}
+
+	return date;
+}
+
+const HTML_ROOT = path.join(__dirname, '/static');
+const DATA_ROOT = path.join(__dirname, '/data');
+
+const IMG_MINE_ROOT = path.join(HTML_ROOT, '/images/Sent');
+const IMG_OTHER_ROOT = path.join(HTML_ROOT, '/images');
+
+const VID_MINE_ROOT = path.join(HTML_ROOT, '/video/Sent');
+const VID_OTHER_ROOT = path.join(HTML_ROOT, '/video');
+
+function convertDateString(dateStr) {
+	// YYYYMMDD -> DD/MM/YYYY
+	return dateStr.substring(6, 8) + '/' + dateStr.substring(4, 6) + '/' + dateStr.substring(0, 4);
+}
+
+function getMediaFiles(mediaRoot, prefix) {
+	let dates = {};
+
+	fs.readdirSync(mediaRoot)
+		.filter(file => file.match(new RegExp('^' + prefix + '-.*')))
+		.forEach(file => {
+			let curDate = convertDateString(file.split('-')[1]);
+			if (!dates[curDate]) {
+				dates[curDate] = { 'files': [] };
+			}
+			dates[curDate].files.push(file);
+		});
+
+	console.log('Loaded files from ' + mediaRoot + ' for ' + Object.keys(dates).length + ' dates');
+	return dates;
+}
+
+let img_mine = getMediaFiles(IMG_MINE_ROOT, 'IMG');
+let img_other = getMediaFiles(IMG_OTHER_ROOT, 'IMG');
+
+let vid_mine = getMediaFiles(VID_MINE_ROOT, 'VID');
+let vid_other = getMediaFiles(VID_OTHER_ROOT, 'VID');
+
+
+app.get('/api/chats', function (request, response) {
+	response.setHeader('Content-Type', 'application/json');
+	
+	let files = [];
+	let i = 0;
+
+	fs.readdirSync(DATA_ROOT)
+		.filter(file => file.match(/WhatsApp Chat with .*.txt/))
+		.forEach(file => {
+			files.push({ 'id' : (i ++), 'name': file.replace(/^WhatsApp Chat with /, '').replace(/.txt$/, '') });
+		});
+
+	response.send(JSON.stringify({ 'chats': files }));
+});
+
+app.get('/api/chat', function (request, response) {
+	let chatName = request.query.name;
+	console.log('Request for chat ' + chatName);
+
+	response.setHeader('Content-Type', 'application/json');
+
+	let lines = fs.readFileSync(path.join(DATA_ROOT, '/WhatsApp Chat with ' + chatName + '.txt')).toString().split(/(?:\r\n|\r|\n)/g);
+	let messages = [];
+	let lastDate = "";
+	let i = 0;
+	while (i < lines.length) {
+		let message = {};
+		// extract date from message line
+		message.date = parseDate(lines[i].split(' - ')[0]);
+		if (lastDate != message.date.date) {
+			// create a 'pseudo message' containing just the date when a new day starts
+			messages.push(Object.assign({}, message));
+			lastDate = message.date.date;
+		}
+		let text = [];
+		text.push(lines[i].replace(/[^-]* - /, ''));
+		// extract message sender
+		if (text[0].includes(':')) {
+			message.person = text[0].split(':')[0];
+			message.myself = (message.person == 'Wolfgang');
+			text[0] = text[0].replace(/[^:]*: /, '');
+		}
+		let j = i + 1;
+		// handle multiline messages
+		while (j < lines.length && !lines[j].match(/[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9].*/)) {
+			text.push(lines[j]);
+			j ++;
+		}
+		message.text = text;
+		messages.push(message);
+		i = j;
+	}
+
+	response.send(JSON.stringify({ 'images': { 'mine': img_mine, 'other': img_other }, 'video': { 'mine': vid_mine, 'other': vid_other }, 'messages': messages }));
+});
+
+console.log('Static content at ' + HTML_ROOT);
+app.use(express.static(HTML_ROOT));
+
+app.listen(PORT, console.log('Chat viewer listening on port ' + PORT));
