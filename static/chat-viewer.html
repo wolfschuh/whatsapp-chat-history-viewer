@@ -50,6 +50,13 @@
                 .fail(function (jqxhr,settings,ex) { alert('failed, '+ ex); });
               });
 
+              function getMediaForDate(images, video, date) {
+                  let media = [];
+                  (!!images[date]) && images[date].files.forEach(file => { media.push({ 'type': 'image', 'file': file }); });
+                  (!!video[date]) && video[date].files.forEach(file => { media.push({ 'type': 'video', 'file': file }); });
+                  return media;
+              }
+
               function loadChat(name, id) {
                     // highlight new selection in person list
                     $(".chat-menu-item").removeClass("active");
@@ -58,66 +65,73 @@
                     // reload chat content
                     $("#chat-content").empty();
                     $.getJSON('/api/chat?name=' + name, null, function(data, textStatus, jqXHR) {
-                        data.messages.forEach(message => {
-                            if (!!message.person) {
-                                // Anzeige einer Message
-                                let text = '';
-                                if (message.text.includes('<Media omitted>')) {
-                                    // TODO: We need to show all media
-                                    let images = (message.myself) ? data.images.mine[message.date.date] : data.images.other[message.date.date];
-                                    if (!!images) {
-                                        text = '<img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + images.files[0] + '" width="80%" height="80%" />';
-                                    }
-                                    else {
-                                        text = 'Image not available';
-                                    }
-                                } else {
-                                    message.text.forEach(line => {
-                                        text += escapeHtml(line) + '<br />';
-                                    });
-                                }
-                                let type = (message.myself) ? ' my-message' : 'info';
-                                $("#chat-content").append(
-                                '<div class="message ' + type + '">' +
-                                '        <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
-                                '        <div class="message-body">' +
-                                '            <div class="message-info">' +
-                                '                <h4>' + message.person + '</h4>' +
-                                '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
-                                '            </div>' +
-                                '            <hr>' +
-                                '            <div class="message-text">' +
-                                                text +
-                                '            </div>' +
-                                '        </div>' +
-                                '        <br>' +
-                                '    </div>');
-                            } else if (!!message.text) {
-                                // Anzeige von Systemnachrichten
-                                $("#chat-content").append(
-                                '<div class="message system">' +
-                                '        <div class="message-body system">' +
-                                '            <div class="message-info system">' +
-                                '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
-                                '            </div>' +
-                                '            <hr>' +
-                                '            <div class="message-text system">' +
-                                                escapeHtml(message.text[0]) +
-                                '            </div>' +
-                                '        </div>' +
-                                '        <br>' +
-                                '    </div>');
-                            } else {
+                        Object.keys(data.messages).forEach(date => {
                                 // Anzeige des Datums
                                 $("#chat-content").append(
                                 '<div class="message system">' +
-/*                                '        <div class="message-body system">' +
-*/                                '            <div class="message-text system">' +
-                                                escapeHtml(message.date.date) +
+                                '            <div class="message-text system">' +
+                                                escapeHtml(date) +
                                 '            </div>' +
-/*                                '        </div>' +
-*/                                '    </div>');
-                            }
+                                '    </div>');
+
+                                // TODO: We need to show all media
+                                let mineMedia = getMediaForDate(data.images.mine, data.video.mine, date);
+                                let otherMedia = getMediaForDate(data.images.other, data.video.other, date);
+
+                                data.messages[date].forEach(message => {
+                                    if (!!message.person) {
+                                        // Anzeige einer Message
+                                        let text = '';
+                                        if (message.text.includes('<Media omitted>')) {
+                                            let media = (message.myself) ? mineMedia : otherMedia;
+                                            if (media.length > 0) {
+                                                if (media[0].type == 'image') {
+                                                    text = 'Image: <img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + media[0].file + '" width="80%" height="80%" />';
+                                                } else {
+                                                    text = '((Video)) ' + media[0].file;
+                                                }
+                                            }
+                                            else {
+                                                text = 'Image not available';
+                                            }
+                                        } else {
+                                            message.text.forEach(line => {
+                                                text += escapeHtml(line) + '<br />';
+                                            });
+                                        }
+                                        let type = (message.myself) ? ' my-message' : 'info';
+                                        $("#chat-content").append(
+                                        '<div class="message ' + type + '">' +
+                                        '        <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
+                                        '        <div class="message-body">' +
+                                        '            <div class="message-info">' +
+                                        '                <h4>' + message.person + '</h4>' +
+                                        '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
+                                        '            </div>' +
+                                        '            <hr>' +
+                                        '            <div class="message-text">' +
+                                                        text +
+                                        '            </div>' +
+                                        '        </div>' +
+                                        '        <br>' +
+                                        '    </div>');
+                                    } else if (!!message.text) {
+                                        // Anzeige von Systemnachrichten
+                                        $("#chat-content").append(
+                                        '<div class="message system">' +
+                                        '        <div class="message-body system">' +
+                                        '            <div class="message-info system">' +
+                                        '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
+                                        '            </div>' +
+                                        '            <hr>' +
+                                        '            <div class="message-text system">' +
+                                                        escapeHtml(message.text[0]) +
+                                        '            </div>' +
+                                        '        </div>' +
+                                        '        <br>' +
+                                        '    </div>');
+                                    }
+                                });
                         });
                     });
               }

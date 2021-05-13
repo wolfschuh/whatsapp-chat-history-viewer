@@ -6,26 +6,7 @@ const app = express();
 
 const PORT = 9080;
 
-app.get('/', function (request, response) {
-	response.send('Hello, World!');
-});
-
-function parseDate(dateString) {
-	let date = {};
-	date.date = dateString.substring(0, 10);
-	let hour = dateString.replace(/.*, /, '').replace(/:.*/, '');
-	let minute = dateString.replace(/.*:/, '').replace(/ .*/, '');
-	date.time = hour + ':' + minute + ' ';
-	if (dateString.includes('in the afternoon') || dateString.includes('in the evening') || (dateString.includes('in the night') && hour > 8)) {
-		date.time += 'PM';
-	} else {
-		date.time += 'AM';
-	}
-
-	return date;
-}
-
-const HTML_ROOT = path.join(__dirname, '/static');
+const HTML_ROOT = path.join(!media && __dirname, '/static');
 const DATA_ROOT = path.join(__dirname, '/data');
 
 const IMG_MINE_ROOT = path.join(HTML_ROOT, '/images/Sent');
@@ -75,25 +56,29 @@ function getChatList() {
 	return files;
 }
 
-app.get('/api/chats', function (request, response) {
-	response.setHeader('Content-Type', 'application/json');
-	response.send(JSON.stringify({ 'chats': getChatList() }));
-});
+function parseDate(dateString) {
+	let date = {};
+	date.date = dateString.substring(0, 10);
+	let hour = dateString.replace(/.*, /, '').replace(/:.*/, '');
+	let minute = dateString.replace(/.*:/, '').replace(/ .*/, '');
+	date.time = hour + ':' + minute + ' ';
+	if (dateString.includes('in the afternoon') || dateString.includes('in the evening') || (dateString.includes('in the night') && hour > 8)) {
+		date.time += 'PM';
+	} else {
+		date.time += 'AM';
+	}
+
+	return date;
+}
 
 function getChatContents(chatName) {
 	let lines = fs.readFileSync(path.join(DATA_ROOT, '/WhatsApp Chat with ' + chatName + '.txt')).toString().split(/(?:\r\n|\r|\n)/g);
-	let messages = [];
-	let lastDate = "";
+	let dates = {};
 	let i = 0;
 	while (i < lines.length) {
 		let message = {};
-		// extract date from message line
+		// extract date and time from message line
 		message.date = parseDate(lines[i].split(' - ')[0]);
-		if (lastDate != message.date.date) {
-			// create a 'pseudo message' containing just the date when a new day starts
-			messages.push(Object.assign({}, message));
-			lastDate = message.date.date;
-		}
 		let text = [];
 		text.push(lines[i].replace(/[^-]* - /, ''));
 		// extract message sender
@@ -109,11 +94,23 @@ function getChatContents(chatName) {
 			j ++;
 		}
 		message.text = text;
-		messages.push(message);
+		if (!dates[message.date.date]) {
+			dates[message.date.date] = [];
+		}
+		dates[message.date.date].push(message);
 		i = j;
 	}
-	return messages;
+	return dates;
 }	
+
+app.get('/', function (request, response) {
+	response.send('Hello, World!');
+});
+
+app.get('/api/chats', function (request, response) {
+	response.setHeader('Content-Type', 'application/json');
+	response.send(JSON.stringify({ 'chats': getChatList() }));
+});
 
 app.get('/api/chat', function (request, response) {
 	let chatName = request.query.name;
