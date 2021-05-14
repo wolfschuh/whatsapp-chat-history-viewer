@@ -57,6 +57,18 @@
                   return media;
               }
 
+              function createMediaTag(media, myself) {
+                let location = '/static/' 
+                    + ((media.mediaList[media.curIndex].type == 'image') ? 'images' : 'video') + '/' 
+                    + ((myself) ? 'Sent/' : '') 
+                    + media.mediaList[media.curIndex].file;
+                if (media.mediaList[media.curIndex].type == 'image') {
+                    return '<img src="' + location + '" width="80%" height="80%" />';
+                } else {
+                    return '<video src="' + location + '" controls width="80%" height="80%" />'
+                }
+              }
+
               function loadChat(name, id) {
                     // highlight new selection in person list
                     $(".chat-menu-item").removeClass("active");
@@ -93,18 +105,21 @@
                                         if (message.text.includes('<Media omitted>')) {
                                             let media = (message.myself) ? mineMedia : otherMedia;
                                             // TODO: handle situation with remaining media
-                                            if (media.mediaList.length > media.curIndex) {
-                                                if (media.mediaList[media.curIndex].type == 'image') {
-                                                    text = 'Image: <img src="/static/images/' + ((message.myself) ? 'Sent/' : '') + media.mediaList[media.curIndex].file + '" width="80%" height="80%" />';
-                                                } else {
-                                                    // TODO: Show video
-                                                    text = '((Video)) ' + media.mediaList[media.curIndex].file;
-                                                }
+                                            if (media.curIndex < media.mediaList.length) {
+                                                text = createMediaTag(media, message.myself);
                                             }
                                             else {
                                                 text = 'Media not available';
                                             }
                                             media.curIndex ++;
+
+                                            // check for additional available media (because media cannot be assigned to one chat)
+                                            if (media.curIndex == media.mediaReferences) {
+                                                while (media.curIndex < media.mediaList.length) {
+                                                    text += '<br/><br />' + createMediaTag(media, message.myself) + ' (additional)';
+                                                    media.curIndex ++; 
+                                                }
+                                            }
                                         } else {
                                             message.text.forEach(line => {
                                                 text += escapeHtml(line) + '<br />';
@@ -168,56 +183,7 @@
                     <div class="tab-pane message-body active">
                         <div class="message-chat">
                             <div class="chat-body" id="chat-content">
-<!--
-                                <div class="message info">
-                                    <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar1.png">
-                                    <div class="message-body">
-                                        <div class="message-info">
-                                            <h4> ((Name)) </h4>
-                                            <h5> <i class="fa fa-clock-o"></i> ((Uhrzeit)) </h5>
-                                        </div>
-                                        <hr>
-                                        <div class="message-text">
-                                            I've seen your new template, Dauphin, it's amazing !
-                                        </div>
-                                    </div>
-                                    <br>
-                                </div>
-        
-                                <div class="message my-message">
-                                    <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar1.png">
-        
-                                    <div class="message-body">
-                                        <div class="message-body-inner">
-                                            <div class="message-info">
-                                                <h4> Dennis Novac </h4>
-                                                <h5> <i class="fa fa-clock-o"></i> 2:28 PM </h5>
-                                            </div>
-                                            <hr>
-                                            <div class="message-text">
-                                                Thanks, I think I will use this for my next dashboard system.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <br>
-                                </div>
-        
-                                <div class="message info">
-                                    <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar1.png">
-        
-                                    <div class="message-body">
-                                        <div class="message-info">
-                                            <h4> Elon Musk </h4>
-                                            <h5> <i class="fa fa-clock-o"></i> 2:32 PM </h5>
-                                        </div>
-                                        <hr>
-                                        <div class="message-text">
-                                            Hah, too late, I already bought it and my team is impleting the new design right now.
-                                        </div>
-                                    </div>
-                                    <br>
-                                </div>
-                                -->
+                                <!-- Enthält die Chat History -->
                             </div>
                         </div>
                     </div>
