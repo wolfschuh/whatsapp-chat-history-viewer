@@ -14,8 +14,8 @@ body{
     width: 70px;
     height: 25px;
     line-height: 28px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 100;
     padding-right: 5px;
 }
 .contacts li > .info-combo > h5 {
@@ -88,74 +88,7 @@ body{
   border-top-left-radius: 5px;
   float: left;
 }
-/*
-.contacts-list .inbox-categories {
-  width: 100%;
-  padding: 0;
-  margin-left: 0;
-}
 
-.contacts-list .inbox-categories > div {
-  float: left;
-  width: 76px;
-  padding: 15px 5px;
-  font-size: 14px;
-  text-align: center;
-  border-right: 1px solid rgba(0,0,0,0.1);
-  background-color: rgba(255,255,255,0.75);
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.contacts-list .inbox-categories > div:nth-child(1) {
-  color: #2da9e9;
-  border-right-color: rgba(45,129,233,0.06);
-  border-bottom: 4px solid #2da9e9;
-  border-top-left-radius: 5px;
-}
-
-.contacts-list .inbox-categories > div:nth-child(1).active {
-  color: #fff;
-  background-color: #2da9e9;
-  border-bottom: 4px solid rgba(0,0,0,0.15);
-}
-
-.contacts-list .inbox-categories > div:nth-child(2) {
-  color: #0ec8a2;
-  border-right-color: rgba(14,200,162,0.06);
-  border-bottom: 4px solid #0ec8a2;
-}
-
-.contacts-list .inbox-categories > div:nth-child(2).active {
-  color: #fff;
-  background-color: #0ec8a2;
-  border-bottom: 4px solid rgba(0,0,0,0.15);
-}
-
-.contacts-list .inbox-categories > div:nth-child(3) {
-  color: #ff9e2a;
-  border-right-color: rgba(255,152,14,0.06);
-  border-bottom: 4px solid #ff9e2a;
-}
-
-.contacts-list .inbox-categories > div:nth-child(3).active {
-  color: #fff;
-  background-color: #ff9e2a;
-  border-bottom: 4px solid rgba(0,0,0,0.15);
-}
-
-.contacts-list .inbox-categories > div:nth-child(4) {
-  color: #314557;
-  border-bottom: 4px solid #314557;
-  border-right-color: transparent;
-}
-
-.contacts-list .inbox-categories > div:nth-child(4).active {
-  color: #fff;
-  background-color: #314557;
-  border-bottom: 4px solid rgba(0,0,0,0.35);
-}
-*/
 .contacts-list .panel-search > input {
   margin-left: 5px;
   background-color: rgba(0,0,0,0);
@@ -247,23 +180,7 @@ body{
   border-bottom-color: rgba(205,211,237,0.75);
   background-color: #fbfcff;
 }
-/*
-.contacts.success li.active {
-  border-left: 4px solid #0ec8a2;
-}
 
-.contacts.warning li.active {
-  border-left: 4px solid #ff9e2a;
-}
-
-.contacts.danger li.active {
-  border-left: 4px solid #f95858;
-}
-
-.contacts.dark li.active {
-  border-left: 4px solid #314557;
-}
-*/
 .contacts li > .info-combo {
   width: 172px;
   cursor: pointer;
@@ -283,44 +200,6 @@ body{
   z-index: 23299;
 }
 
-.contacts li .message-time {
-  text-align: right;
-  display: block;
-  margin-left: -15px;
-  width: 70px;
-  height: 25px;
-  line-height: 28px;
-  font-size: 14px;
-  font-weight: 600;
-  padding-right: 5px;
-}
-/*
-.contacts li .contacts-add .fa-trash-o {
-  position: absolute;
-  font-size: 14px;
-  right: 12px;
-  bottom: 15px;
-  color: #a6a6a6;
-  cursor: pointer;
-}
-
-.contacts li .contacts-add .fa-paperclip {
-  position: absolute;
-  font-size: 14px;
-  right: 34px;
-  bottom: 15px;
-  color: #a6a6a6;
-  cursor: pointer;
-}
-
-.contacts li .contacts-add .fa-trash-o:hover {
-  color: #f95858;
-}
-
-.contacts li .contacts-add .fa-paperclip:hover {
-  color: #ff9e2a;
-}
-*/
 .contacts li > .info-combo > h5 {
   width: 180px;
   font-size: 12px;
@@ -410,46 +289,7 @@ body{
   margin-right: 5px;
   font-size: 18px;
 }
-/*
-.new-message-wrapper {
-  position: absolute;
-  max-height: 400px;
-  top: 53px;
-  background-color: #fff;
-  z-index: 105;
-  padding: 20px 15px 30px 15px;
-  border-bottom: 1px solid #cfdbe2;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  box-shadow: 0 7px 10px rgba(0,0,0,0.25);
-  transition: 0.5s;
-  display: none;
-}
 
-.new-message-wrapper.closed {
-  opacity: 0;
-  max-height: 0;
-}
-
-.chat-footer.new-message-textarea {
-  display: block;
-  position: relative;
-  padding: 0 10px;
-}
-
-.chat-footer.new-message-textarea .send-message-button {
-  right: 35px;
-}
-
-.chat-footer.new-message-textarea .upload-file {
-  right: 85px;
-}
-
-.chat-footer.new-message-textarea .send-message-text {
-  padding-right: 100px;
-  height: 90px;
-}
-*/
 .message-chat {
   width: 100%;
   overflow: hidden;
@@ -629,47 +469,7 @@ body{
 .message.info:after, .message.info:before {
   border-right: 13px solid #2da9e9;
 }
-/*
-.message.success .message-body {
-  background-color: #0ec8a2;
-  border: 1px solid #0ec8a2;
-  color: #fff;
-}
 
-.message.success:after, .message.success:before {
-  border-right: 13px solid #0ec8a2;
-}
-
-.message.warning .message-body {
-  background-color: #ff9e2a;
-  border: 1px solid #ff9e2a;
-  color: #fff;
-}
-
-.message.warning:after, .message.warning:before {
-  border-right: 13px solid #ff9e2a;
-}
-
-.message.danger .message-body {
-  background-color: #f95858;
-  border: 1px solid #f95858;
-  color: #fff;
-}
-
-.message.danger:after, .message.danger:before {
-  border-right: 13px solid #f95858;
-}
-
-.message.dark .message-body {
-  background-color: #314557;
-  border: 1px solid #314557;
-  color: #fff;
-}
-
-.message.dark:after, .message.dark:before {
-  border-right: 13px solid #314557;
-}
-*/
 .message.info .message-info > h4, .message.success .message-info > h4,
 .message.warning .message-info > h4, .message.danger .message-info > h4,
 .message.dark .message-info > h4 {
@@ -684,70 +484,7 @@ body{
   color: #fff;
   opacity: 0.9;
 }
-/*
-.chat-footer {
-  position: relative;
-  width: 100%;
-  padding: 0 80px;
-}
 
-.chat-footer .send-message-text {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-height: 55px;
-  max-height: 75px;
-  background-color: #fff;
-  border-radius: 5px;
-  padding: 5px 95px 5px 10px;
-  font-size: 13px;
-  resize: vertical;
-  outline: none;
-  border: 1px solid #e0e6eb;
-}
-
-.chat-footer .send-message-button {
-  display: block;
-  position: absolute;
-  width: 35px;
-  height: 35px;
-  right: 100px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  border: 1px solid rgba(0,0,0,0.05);
-  outline: none;
-  font-weight: 600;
-  border-radius: 50%;
-  padding: 0;
-}
-
-.chat-footer .send-message-button > i {
-  font-size: 16px;
-  margin: 0 0 0 -2px;
-}
-
-.chat-footer label.upload-file input[type="file"] {
-  position: fixed;
-  top: -1000px;
-}
-
-.chat-footer .upload-file {
-  display: block;
-  position: absolute;
-  right: 150px;
-  height: 30px;
-  font-size: 20px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  opacity: 0.25;
-}
-
-.chat-footer .upload-file:hover {
-  opacity: 1;
-}
-*/
 @media screen and (max-width: 767px) {
   .messages-panel {
     min-width: 0;
@@ -784,20 +521,6 @@ body{
     background-color: #fff;
     width: 100%;
   }
-/*
-  .chat-footer {
-    margin-bottom: 20px;
-    padding: 0 20px;
-  }
-
-  .chat-footer .send-message-button {
-    right: 40px;
-  }
-
-  .chat-footer .upload-file {
-    right: 90px;
-  }
-*/
 
   .message-body .message-top > .btn {
     border-radius: 0;
@@ -808,80 +531,7 @@ body{
     display: none;
   }
 }
-/* Profile page */
-/*
-.profile-main {
-  background-color: #fff;
-  border: 1px solid #dce2e9;
-  border-radius: 3px;
-  position: relative;
-  margin-bottom: 20px;
-}
 
-.profile-main .profile-background {
-  background-image: url('../images/samples/forest.png');
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position: center;
-  width: 100%;
-  height: 260px;
-}
-
-.profile-main .profile-info {
-  width: 100%;
-  margin: 0 auto;
-  background-color: #fff;
-  height: 70px;
-  border-radius: 0 0 3px 3px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.profile-main .profile-info > div {
-  margin: 0 10px;
-}
-
-.profile-main .profile-info > div:last-child {
-  padding-right: 25px;
-}
-
-.profile-main .profile-info > div h4 {
-  font-size: 16px;
-  margin-bottom: 0;
-}
-
-.profile-main .profile-info > div h5 {
-  margin-top: 5px;
-  font-weight: 500;
-}
-
-.profile-main .profile-button {
-  padding: 8px 0;
-  position: absolute;
-  right: 25px;
-  bottom: 16px;
-  width: 150px;
-}
-
-.profile-main .profile-picture {
-  width: 150px;
-  height: 150px;
-  border: 4px solid #fff;
-  position: absolute;
-  left: 25px;
-  bottom: 14px;
-}
-
-@media screen and (max-width: 767px) {
-  .profile-main .profile-info .profile-status,
-  .profile-main .profile-info .profile-posts,
-  .profile-main .profile-info .profile-date {
-    display: none;
-  }
-}
-*/
 .contacts li > .info-combo {
    display:inline-block;
 }
