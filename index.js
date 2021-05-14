@@ -6,7 +6,7 @@ const app = express();
 
 const PORT = 9080;
 
-const HTML_ROOT = path.join(!media && __dirname, '/static');
+const HTML_ROOT = path.join(__dirname, '/static');
 const DATA_ROOT = path.join(__dirname, '/data');
 
 const IMG_MINE_ROOT = path.join(HTML_ROOT, '/images/Sent');
@@ -43,6 +43,21 @@ let img_other = getMediaFiles(IMG_OTHER_ROOT, 'IMG');
 let vid_mine = getMediaFiles(VID_MINE_ROOT, 'VID');
 let vid_other = getMediaFiles(VID_OTHER_ROOT, 'VID');
 
+function loadChatProperties() {
+	return JSON.parse(fs.readFileSync(path.join(DATA_ROOT, 'chatProps.json')));	
+}
+
+let chatProps = loadChatProperties();
+console.log('Loaded properties of ' + Object.keys(chatProps).length + ' chats');
+
+function convertDate(date) {
+	// { 'date': 'DD/MM/YYYY', 'time': 'H:MM AM' } => 'YYYY-MM-DD mmmm'
+	console.log(JSON.stringify(date));	
+	let t = date.time.replace(' ', ':').split(':');
+	let minutes = t[0] * 60 + t[1] + (t[2] == 'PM' ? 720 : 0);
+	return date.date.replace(/(..)\/(..)\/(....)/, '$3-$2-$1 ') + (minutes < 1000 ? '0' : '') + minutes;
+}
+
 function getChatList() {
 	let files = [];
 	let i = 0;
@@ -50,8 +65,21 @@ function getChatList() {
 	fs.readdirSync(DATA_ROOT)
 		.filter(file => file.match(/WhatsApp Chat with .*.txt/))
 		.forEach(file => {
-			files.push({ 'id' : (i ++), 'name': file.replace(/^WhatsApp Chat with /, '').replace(/.txt$/, '') });
+			let name = file.replace(/^WhatsApp Chat with /, '').replace(/.txt$/, '');
+			files.push({ 'id' : (i ++), 'name': name, 'props': chatProps[name] });
 		});
+
+	files.sort((a, b) => {
+		if (!a.props.date) {
+			return 1;
+		}
+		else if (!b.props.date) {
+			return -1;
+		}
+		else {
+			return convertDate(b.props.date).localeCompare(convertDate(a.props.date));
+		}
+	});
 
 	return files;
 }

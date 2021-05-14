@@ -39,12 +39,12 @@
                                     '   <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
                                     '    <div class="vcentered info-combo">' +
                                     '        <h3 class="no-margin-bottom name"><a href="javascript:loadChat(\'' + escapeHtml(element.name) + '\', ' + element.id + ')">' + escapeHtml(element.name) + '</a></h3>' +
-/*                                    '        <h5>((Letzte Chat-Message))</h5>' +
-*/                                    '    </div>' +
-/*                                    '    <div class="contacts-add">' +
-                                    '        <span class="message-time">((Uhrzeit))</span>' +
+                                    '        <h5>' + escapeHtml(element.props.text) + '</h5>' +
                                     '    </div>' +
-*/                                    '</li>');
+                                    '    <div class="contacts-add">' +
+                                    '        <span class="message-time">' + element.props.date.date + ' ' + element.props.date.time + '</span>' +
+                                    '    </div>' +
+                                    '</li>');
                     });
                 })
                 .fail(function (jqxhr,settings,ex) { alert('failed, '+ ex); });

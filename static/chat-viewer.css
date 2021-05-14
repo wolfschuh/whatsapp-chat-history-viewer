@@ -4,7 +4,7 @@ body{
     background:#eee; 
 }
 .contacts li > .info-combo > h3.name{
-    font-size:14px;   /* TODO: ursprünglich 12px, wenn zusätzliche Info angezeigt wird */
+    font-size:12px;
 }
 
 .contacts li .message-time {
