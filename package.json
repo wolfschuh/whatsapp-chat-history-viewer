@@ -4,7 +4,7 @@
   "description": "Viewer for exported WhatsApp chats",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Wolfgang Schuh (WolfgangSchuh@gmx.net)",
   "license": "ISC",

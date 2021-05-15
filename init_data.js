@@ -3,35 +3,10 @@
 const path = require('path');
 const fs = require('fs');
 
+const common = require('./common');
+
 const DATA_ROOT = path.join(__dirname, '/data');
-
-function getChatList() {
-	let files = [];
-	let i = 0;
-
-	fs.readdirSync(DATA_ROOT)
-		.filter(file => file.match(/WhatsApp Chat with .*.txt/))
-		.forEach(file => {
-			files.push({ 'id' : (i ++), 'name': file.replace(/^WhatsApp Chat with /, '').replace(/.txt$/, ''), 'file': file });
-		});
-
-	return files;
-}
-
-function parseDate(dateString) {
-	let date = {};
-	date.date = dateString.substring(0, 10);
-	let hour = dateString.replace(/.*, /, '').replace(/:.*/, '');
-	let minute = dateString.replace(/.*:/, '').replace(/ .*/, '');
-	date.time = hour + ':' + minute + ' ';
-	if (dateString.includes('in the afternoon') || dateString.includes('in the evening') || (dateString.includes('in the night') && hour > 8)) {
-		date.time += 'PM';
-	} else {
-		date.time += 'AM';
-	}
-
-	return date;
-}
+const CHAT_PROPERTIES_FILE = path.join(DATA_ROOT, 'chatProps.json');
 
 function decideWhetherTextApplies(text) {
     if (text.length == 0) {
@@ -49,7 +24,7 @@ function getLastChatInfo(chatFile) {
 	let i = 0;
 	while (i < lines.length) {
 		// extract date and time from message line
-		let date = parseDate(lines[i].split(' - ')[0]);
+		let date = common.parseDate(lines[i].split(' - ')[0]);
 		let text = lines[i].replace(/[^-]* - /, '');
 		// remove message sender
 		if (text.includes(':')) {
@@ -81,8 +56,8 @@ function getLastChatInfo(chatFile) {
 
 let chatProps = {}
 
-getChatList().forEach(chat => {
+common.getChatList(DATA_ROOT).forEach(chat => {
     chatProps[chat.name] = getLastChatInfo(chat.file);
 });
 
-console.log(JSON.stringify(chatProps, null, 2));
+fs.writeFileSync(CHAT_PROPERTIES_FILE, JSON.stringify(chatProps, null, 2));
