@@ -24,10 +24,14 @@
                 '=': '&#x3D;'
             };
 
-            function escapeHtml (string) {
+            function escapeHtml(string) {
                 return String(string).replace(/[&<>"'`=\/]/g, function (s) {
                     return entityMap[s];
                 });
+            }
+
+            function escapeQuote(string) {
+                return String(string).replace(/'/g, '\\\'');
             }
 
               $(function() {
@@ -38,7 +42,7 @@
                                     '   <!--<div class="message-count"> 1 </div>-->' +
                                     '   <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
                                     '    <div class="vcentered info-combo">' +
-                                    '        <h3 class="no-margin-bottom name"><a href="javascript:loadChat(\'' + escapeHtml(element.name) + '\', ' + element.id + ')">' + escapeHtml(element.name) + '</a></h3>' +
+                                    '        <h3 class="no-margin-bottom name"><a href="javascript:loadChat(\'' + escapeQuote(element.name) + '\', ' + element.id + ')">' + escapeHtml(element.name) + '</a></h3>' +
                                     '        <h5>' + escapeHtml(element.props.text) + '</h5>' +
                                     '    </div>' +
                                     '    <div class="contacts-add">' +
@@ -76,7 +80,7 @@
 
                     // reload chat content
                     $("#chat-content").empty();
-                    $.getJSON('/api/chat?name=' + name, null, function(data, textStatus, jqXHR) {
+                    $.getJSON('/api/chat?name=' + encodeURIComponent(name), null, function(data, textStatus, jqXHR) {
                         Object.keys(data.messages).forEach(date => {
                                 // Anzeige des Datums
                                 $("#chat-content").append(
@@ -104,7 +108,6 @@
                                         let text = '';
                                         if (message.text.includes('<Media omitted>')) {
                                             let media = (message.myself) ? mineMedia : otherMedia;
-                                            // TODO: handle situation with remaining media
                                             if (media.curIndex < media.mediaList.length) {
                                                 text = createMediaTag(media, message.myself);
                                             }
