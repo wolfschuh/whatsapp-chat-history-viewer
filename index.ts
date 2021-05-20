@@ -12,13 +12,22 @@ const app = express();
 const PORT : number = 9080;
 
 const HTML_ROOT : string = path.join(__dirname, '/static');
+
+// folder containing exported chat history text files
 const DATA_ROOT : string = path.join(__dirname, '/data');
 
+// folder containing images sent by me
 const IMG_MINE_ROOT : string = path.join(HTML_ROOT, '/images/Sent');
+// folder containing images sent by chat partners
 const IMG_OTHER_ROOT : string = path.join(HTML_ROOT, '/images');
 
+// folder containing videos sent by me
 const VID_MINE_ROOT : string = path.join(HTML_ROOT, '/video/Sent');
+// folder containing videos sent by chat partners
 const VID_OTHER_ROOT : string = path.join(HTML_ROOT, '/video');
+
+// my identification within chat history
+const MY_NAME : string = "Wolfgang";
 
 function convertDateString(dateStr : string) : string {
 	// YYYYMMDD -> DD/MM/YYYY
@@ -122,7 +131,7 @@ function getChatContents(chatName : string) : ChatContents {
 		// extract message sender
 		if (message.text[0].includes(':')) {
 			message.person = message.text[0].split(':')[0];
-			message.myself = (message.person == 'Wolfgang');
+			message.myself = (message.person == MY_NAME);
 			message.text[0] = message.text[0].replace(/[^:]*: /, '');
 		}
 		let j = i + 1;
