@@ -38,7 +38,7 @@ Per default, it runs on local port 9080. Upon successful start, open the URL [ht
 
 When using the example chat data included in this project, the application presents itself as:
 
-!(resources/Chat_Viewer_Demo.png)
+<img src="resources/Chat_Viewer_Demo.png" width="50%" height= "50%"/>
 
 ## Important
 

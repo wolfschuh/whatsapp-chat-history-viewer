@@ -1,7 +1,4 @@
 .vscode
 build
-data
 node_modules
 package-lock.json
-static/images
-static/video
