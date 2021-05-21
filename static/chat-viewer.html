@@ -1,199 +1,205 @@
 <!DOCTYPE html>
 <html>
-	<head>
-        <!-- von https://www.bootdey.com/snippets/view/messages-chat-with-tabs -->
 
-        <title>Chat</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"/>
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous"/>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css"/>
-        <link rel="stylesheet" type="text/css" href="chat-viewer.css"/>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
-        <script>
+<head>
+    <!-- from https://www.bootdey.com/snippets/view/messages-chat-with-tabs -->
 
-            var entityMap = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;',
-                '/': '&#x2F;',
-                '`': '&#x60;',
-                '=': '&#x3D;'
-            };
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css" />
+    <link rel="stylesheet" type="text/css" href="chat-viewer.css" />
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
+    <script>
 
-            function escapeHtml(string) {
-                return String(string).replace(/[&<>"'`=\/]/g, function (s) {
-                    return entityMap[s];
+        var entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;',
+            '`': '&#x60;',
+            '=': '&#x3D;'
+        };
+
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+                return entityMap[s];
+            });
+        }
+
+        function escapeQuote(string) {
+            return String(string).replace(/'/g, '\\\'');
+        }
+
+        $(function () {
+            // show list of chat contacts and groups
+            $.getJSON('/api/chats', null, function (data, textStatus, jqXHR) {
+                data.chats.forEach(element => {
+                    let active = (element.id == -1) ? ' class="chat-menu-item active"' : 'class="chat-menu-item"';
+                    $("#contacts").append('<li data-toggle="tab" id="chat-' + element.id + '" data-target="#inbox-message-' + element.id + '"' + active + '>' +
+                        '   <!--<div class="message-count"> 1 </div>-->' +
+                        '   <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
+                        '    <div class="vcentered info-combo">' +
+                        '        <h3 class="no-margin-bottom name"><a href="javascript:loadChat(\'' + escapeQuote(element.name) + '\', ' + element.id + ')">' + escapeHtml(element.name) + '</a></h3>' +
+                        '        <h5>' + escapeHtml(element.props.text) + '</h5>' +
+                        '    </div>' +
+                        '    <div class="contacts-add">' +
+                        '        <span class="message-time">' + element.props.date.date + ' ' + element.props.date.time + '</span>' +
+                        '    </div>' +
+                        '</li>');
                 });
+            })
+                .fail(function (jqxhr, settings, ex) { alert('failed, ' + ex); });
+        });
+
+        function getMediaForDate(images, video, date) {
+            let media = [];
+            (!!images[date]) && images[date].files.forEach(file => { media.push({ 'type': 'image', 'file': file }); });
+            (!!video[date]) && video[date].files.forEach(file => { media.push({ 'type': 'video', 'file': file }); });
+            return media;
+        }
+
+        function createMediaTag(media, myself) {
+            let location = '/static/'
+                + ((media.mediaList[media.curIndex].type == 'image') ? 'images' : 'video') + '/'
+                + ((myself) ? 'Sent/' : '')
+                + media.mediaList[media.curIndex].file;
+            if (media.mediaList[media.curIndex].type == 'image') {
+                return '<img src="' + location + '" width="80%" height="80%" />';
+            } else {
+                return '<video src="' + location + '" controls width="80%" height="80%" />'
             }
+        }
 
-            function escapeQuote(string) {
-                return String(string).replace(/'/g, '\\\'');
-            }
+        function loadChat(name, id) {
+            // highlight new selection in person list
+            $(".chat-menu-item").removeClass("active");
+            $("#chat-" + id).addClass("active");
 
-              $(function() {
-                $.getJSON('/api/chats', null, function(data, textStatus, jqXHR) {
-                    data.chats.forEach(element => {
-                        let active = (element.id == -1) ? ' class="chat-menu-item active"' : 'class="chat-menu-item"';
-                        $("#contacts").append('<li data-toggle="tab" id="chat-' + element.id + '" data-target="#inbox-message-' + element.id + '"' + active + '>' +
-                                    '   <!--<div class="message-count"> 1 </div>-->' +
-                                    '   <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
-                                    '    <div class="vcentered info-combo">' +
-                                    '        <h3 class="no-margin-bottom name"><a href="javascript:loadChat(\'' + escapeQuote(element.name) + '\', ' + element.id + ')">' + escapeHtml(element.name) + '</a></h3>' +
-                                    '        <h5>' + escapeHtml(element.props.text) + '</h5>' +
-                                    '    </div>' +
-                                    '    <div class="contacts-add">' +
-                                    '        <span class="message-time">' + element.props.date.date + ' ' + element.props.date.time + '</span>' +
-                                    '    </div>' +
-                                    '</li>');
-                    });
-                })
-                .fail(function (jqxhr,settings,ex) { alert('failed, '+ ex); });
-              });
+            // reload chat content
+            $("#chat-content").empty();
+            $.getJSON('/api/chat?name=' + encodeURIComponent(name), null, function (data, textStatus, jqXHR) {
+                Object.keys(data.messages).forEach(date => {
+                    // show the date of the following messages
+                    $("#chat-content").append(
+                        '<div class="message system">' +
+                        '            <div class="message-text system">' +
+                        escapeHtml(date) +
+                        '            </div>' +
+                        '    </div>');
 
-              function getMediaForDate(images, video, date) {
-                  let media = [];
-                  (!!images[date]) && images[date].files.forEach(file => { media.push({ 'type': 'image', 'file': file }); });
-                  (!!video[date]) && video[date].files.forEach(file => { media.push({ 'type': 'video', 'file': file }); });
-                  return media;
-              }
+                    // collect media contents from a single day
+                    let currentMessages = data.messages[date];
+                    let mineMedia = {
+                        'mediaList': getMediaForDate(data.images.mine, data.video.mine, date),
+                        'mediaReferences': currentMessages.filter(message => (message.myself == true && message.text.includes('<Media omitted>'))).length,
+                        'curIndex': 0
+                    };
+                    let otherMedia = {
+                        'mediaList': getMediaForDate(data.images.other, data.video.other, date),
+                        'mediaReferences': currentMessages.filter(message => (message.myself == false && message.text.includes('<Media omitted>'))).length,
+                        'curIndex': 0
+                    };
 
-              function createMediaTag(media, myself) {
-                let location = '/static/' 
-                    + ((media.mediaList[media.curIndex].type == 'image') ? 'images' : 'video') + '/' 
-                    + ((myself) ? 'Sent/' : '') 
-                    + media.mediaList[media.curIndex].file;
-                if (media.mediaList[media.curIndex].type == 'image') {
-                    return '<img src="' + location + '" width="80%" height="80%" />';
-                } else {
-                    return '<video src="' + location + '" controls width="80%" height="80%" />'
-                }
-              }
+                    // iterate through all messages of a single day
+                    data.messages[date].forEach(message => {
+                        if (!!message.person) {
+                            // show message content (either media content of message text)
+                            let text = '';
+                            if (message.text.includes('<Media omitted>')) {
+                                let media = (message.myself) ? mineMedia : otherMedia;
+                                if (media.curIndex < media.mediaList.length) {
+                                    text = createMediaTag(media, message.myself);
+                                }
+                                else {
+                                    text = 'Media not available';
+                                }
+                                media.curIndex++;
 
-              function loadChat(name, id) {
-                    // highlight new selection in person list
-                    $(".chat-menu-item").removeClass("active");
-                    $("#chat-" + id).addClass("active");
-
-                    // reload chat content
-                    $("#chat-content").empty();
-                    $.getJSON('/api/chat?name=' + encodeURIComponent(name), null, function(data, textStatus, jqXHR) {
-                        Object.keys(data.messages).forEach(date => {
-                                // Anzeige des Datums
-                                $("#chat-content").append(
-                                '<div class="message system">' +
-                                '            <div class="message-text system">' +
-                                                escapeHtml(date) +
-                                '            </div>' +
-                                '    </div>');
-
-                                let currentMessages = data.messages[date];
-                                let mineMedia = {
-                                    'mediaList': getMediaForDate(data.images.mine, data.video.mine, date),
-                                    'mediaReferences': currentMessages.filter(message => (message.myself == true && message.text.includes('<Media omitted>'))).length,
-                                    'curIndex': 0
-                                };
-                                let otherMedia = {
-                                    'mediaList': getMediaForDate(data.images.other, data.video.other, date),
-                                    'mediaReferences': currentMessages.filter(message => (message.myself == false && message.text.includes('<Media omitted>'))).length,
-                                    'curIndex': 0
-                                };
-
-                                data.messages[date].forEach(message => {
-                                    if (!!message.person) {
-                                        // Anzeige einer Message
-                                        let text = '';
-                                        if (message.text.includes('<Media omitted>')) {
-                                            let media = (message.myself) ? mineMedia : otherMedia;
-                                            if (media.curIndex < media.mediaList.length) {
-                                                text = createMediaTag(media, message.myself);
-                                            }
-                                            else {
-                                                text = 'Media not available';
-                                            }
-                                            media.curIndex ++;
-
-                                            // check for additional available media (because media cannot be assigned to one chat)
-                                            if (media.curIndex == media.mediaReferences) {
-                                                while (media.curIndex < media.mediaList.length) {
-                                                    text += '<br/><br />' + createMediaTag(media, message.myself) + ' (additional)';
-                                                    media.curIndex ++; 
-                                                }
-                                            }
-                                        } else {
-                                            message.text.forEach(line => {
-                                                text += escapeHtml(line) + '<br />';
-                                            });
-                                        }
-                                        let type = (message.myself) ? ' my-message' : 'info';
-                                        $("#chat-content").append(
-                                        '<div class="message ' + type + '">' +
-                                        '        <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
-                                        '        <div class="message-body">' +
-                                        '            <div class="message-info">' +
-                                        '                <h4>' + message.person + '</h4>' +
-                                        '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
-                                        '            </div>' +
-                                        '            <hr>' +
-                                        '            <div class="message-text">' +
-                                                        text +
-                                        '            </div>' +
-                                        '        </div>' +
-                                        '        <br>' +
-                                        '    </div>');
-                                    } else if (!!message.text) {
-                                        // Anzeige von Systemnachrichten
-                                        $("#chat-content").append(
-                                        '<div class="message system">' +
-                                        '        <div class="message-body system">' +
-                                        '            <div class="message-info system">' +
-                                        '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
-                                        '            </div>' +
-                                        '            <hr>' +
-                                        '            <div class="message-text system">' +
-                                                        escapeHtml(message.text[0]) +
-                                        '            </div>' +
-                                        '        </div>' +
-                                        '        <br>' +
-                                        '    </div>');
+                                // check for additional available media (because media cannot be assigned to single chat)
+                                if (media.curIndex == media.mediaReferences) {
+                                    while (media.curIndex < media.mediaList.length) {
+                                        text += '<br/><br />' + createMediaTag(media, message.myself) + ' (additional)';
+                                        media.curIndex++;
                                     }
+                                }
+                            } else {
+                                message.text.forEach(line => {
+                                    text += escapeHtml(line) + '<br />';
                                 });
-                        });
+                            }
+                            let type = (message.myself) ? ' my-message' : 'info';
+                            $("#chat-content").append(
+                                '<div class="message ' + type + '">' +
+                                '        <img alt="" class="img-circle medium-image" src="https://bootdey.com/img/Content/avatar/avatar7.png">' +
+                                '        <div class="message-body">' +
+                                '            <div class="message-info">' +
+                                '                <h4>' + message.person + '</h4>' +
+                                '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
+                                '            </div>' +
+                                '            <hr>' +
+                                '            <div class="message-text">' + text + '</div>' +
+                                '        </div>' +
+                                '        <br>' +
+                                '    </div>');
+                        } else if (!!message.text) {
+                            // object is no chat content, so show system message
+                            $("#chat-content").append(
+                                '<div class="message system">' +
+                                '        <div class="message-body system">' +
+                                '            <div class="message-info system">' +
+                                '                <h5> <i class="fa fa-clock-o"></i>' + message.date.time + '</h5>' +
+                                '            </div>' +
+                                '            <hr>' +
+                                '            <div class="message-text system">' +  escapeHtml(message.text[0]) + '</div>' +
+                                '        </div>' +
+                                '        <br>' +
+                                '    </div>');
+                        }
                     });
-              }
-        </script>
-	</head>
-	<body>
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-        <div class="container">
-            <div class="panel messages-panel">
-                <div class="contacts-list">
-                    <div class="tab-content">
-                        <div id="inbox" class="contacts-outter-wrapper tab-pane active">
-                            <div class="contacts-outter">
-                                <ul id="contacts" class="list-unstyled contacts">
-                                    <!-- Enthält die Liste der Chats -->
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
+                });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <div class="container">
+        <div class="panel messages-panel">
+            <div class="contacts-list">
                 <div class="tab-content">
-                    <div class="tab-pane message-body active">
-                        <div class="message-chat">
-                            <div class="chat-body" id="chat-content">
-                                <!-- Enthält die Chat History -->
-                            </div>
+                    <div id="inbox" class="contacts-outter-wrapper tab-pane active">
+                        <div class="contacts-outter">
+                            <ul id="contacts" class="list-unstyled contacts">
+                                <!-- contains list of chat contacts/groups -->
+                            </ul>
                         </div>
                     </div>
-        
-        
                 </div>
             </div>
-        </div>	
-    </body>
+
+            <div class="tab-content">
+                <div class="tab-pane message-body active">
+                    <div class="message-chat">
+                        <div class="chat-body" id="chat-content">
+                            <!-- contains chat history -->
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>
